@@ -1,0 +1,47 @@
+server:
+  port: 7783
+
+spring:
+  application:
+    name: chatgpt-consumer
+  kafka:
+    consumer:
+      key-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      properties:
+        specific.avro.reader: true # Indica que se deben utilizar clases generadas por Avro
+        schema.registry.url: http://localhost:8081 # Ajusta la URL del registro de esquemas según tu configuración
+    producer:
+      properties:
+        key.serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+        value.serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+        schema.registry.url: http://localhost:8081
+
+  cloud:
+    stream:
+      kafka:
+        binder:
+          auto-create-topics: false
+        streams:
+          binder:
+            configuration:
+              state.dir: /tmp
+              commit.interval.ms: 100
+              topology.optimization: all
+              session.timeout.ms: 10000
+              schema.registry.url: http://localhost:8081
+              auto.register.schemas: true
+              default.key.serde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
+              default.value.serde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
+
+chatgpt:
+  api:
+    url: https://api.openai.com/v1/chat/completions
+    key: "<REMOVED>"
+
+logging:
+  level:
+    ROOT: INFO
+    com.top: DEBUG
+    io.confluent.kafka: ERROR
+    org.apache.kafka: ERROR
