@@ -1,0 +1,7 @@
+com\top\application\dto\AuthenticationRequest$AuthenticationRequestBuilder.class
+com\top\application\filter\JwtTokenFilter.class
+com\top\application\configuration\GatewayConfig.class
+com\top\ApiServiceApplication.class
+com\top\application\dto\AuthenticationRequest.class
+com\top\application\dto\AuthenticationResponse.class
+com\top\application\filter\JwtTokenVerifier.class

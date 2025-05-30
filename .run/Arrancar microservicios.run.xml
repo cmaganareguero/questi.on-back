@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Arrancar microservicios" type="CompoundRunConfigurationType">
+    <toRun name="authorization-service" type="Application" />
+    <toRun name="game-service" type="Application" />
+    <toRun name="openai-service" type="Application" />
+    <toRun name="user-consumer" type="Application" />
+    <toRun name="user-producer" type="Application" />
+    <toRun name="userscript-producer" type="Application" />
+    <method v="2" />
+  </configuration>
+</component>

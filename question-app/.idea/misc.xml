@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/assign-movie-room/pom.xml" />
+        <option value="$PROJECT_DIR$/enviador-promociones/pom.xml" />
+        <option value="$PROJECT_DIR$/kafka-LowLevelConsumer-master-d22cb74a7bc707c302ec9b5150cdc95071c3d3fd/pom.xml" />
+        <option value="$PROJECT_DIR$/producer-product/pom.xml" />
+        <option value="$PROJECT_DIR$/consumer-menu/pom.xml" />
+        <option value="$PROJECT_DIR$/agregator-menu/pom.xml" />
+        <option value="$PROJECT_DIR$/consumer-productIVA/pom.xml" />
+        <option value="$PROJECT_DIR$/asignador-profesores/pom.xml" />
+      </list>
+    </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/consultador-prendas/pom.xml" />
+        <option value="$PROJECT_DIR$/final-product/pom.xml" />
+      </set>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="corretto-17" project-jdk-type="JavaSDK" />
+</project>

@@ -1,0 +1,11 @@
+{
+  "type": "record", //objeto
+  "namespace": "com.top.avro", //paquete
+  "name": "AuthorizationKey", //nombre
+  "fields": [  //atributos
+    {
+      "name": "email",
+      "type": "string"
+    }
+  ]
+}

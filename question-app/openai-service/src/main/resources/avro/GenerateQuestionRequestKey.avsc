@@ -1,0 +1,13 @@
+{
+  "type": "record",
+  "namespace": "com.top.avro",
+  "name": "GenerateQuestionRequestKey",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    }
+  ]
+}
+
+

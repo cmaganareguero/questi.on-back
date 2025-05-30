@@ -1,0 +1,39 @@
+{
+  "type": "record",
+  "namespace": "com.top.avro",
+  "name": "UserValue",
+  "fields": [
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "email",
+      "type": "string"
+    },
+    {
+      "name": "gender",
+      "type": "string"
+    },
+    {
+      "name": "birthDate",
+      "type": "string"
+    },
+    {
+      "name": "playerType",
+      "type": "string"
+    },
+    {
+      "name": "password",
+      "type": "string"
+    },
+    {
+      "name": "games",
+      "type": ["null", {
+        "type": "array",
+        "items": "string"
+      }],
+      "default": null
+    }
+  ]
+}

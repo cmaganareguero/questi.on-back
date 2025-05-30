@@ -1,0 +1,70 @@
+{
+  "type": "record",
+  "namespace": "com.top.avro",
+  "name": "GameValue",
+  "fields": [
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "category",
+      "type": "string"
+    },
+    {
+      "name": "difficulty",
+      "type": "string"
+    },
+    {
+      "name": "answerType",
+      "type": "string"
+    },
+    {
+      "name": "date",
+      "type": "string"
+    },
+    {
+      "name": "successes",
+      "type": "int"
+    },
+    {
+      "name": "failures",
+      "type": "int"
+    },
+    {
+      "name": "numQuestions",
+      "type": "int"
+    },
+    {
+      "name": "idUser",
+      "type": "string"
+    },
+    {
+      "name": "questions",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "record",
+          "name": "Question",
+          "fields": [
+            {
+              "name": "question",
+              "type": "string"
+            },
+            {
+              "name": "answers",
+              "type": {
+                "type": "array",
+                "items": "string"
+              }
+            },
+            {
+              "name": "correctAnswerIndex",
+              "type": "int"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

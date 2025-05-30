@@ -1,0 +1,25 @@
+server:
+  port: 7786
+
+spring:
+  config:
+    activate:
+      on-profile: default
+
+  application:
+    name: authorization-service
+
+  logging:
+    level:
+      ROOT: INFO
+      com.top: DEBUG
+      io.confluent.kafka: ERROR
+      org.apache.kafka: ERROR
+
+  security:
+    jwt:
+      token:
+        expire-length: 3600000
+
+jwt:
+  secret: J4HahvVSK1eHF1f4uNNxiY5z5B7lOgPVZbJx4UxGTSU=

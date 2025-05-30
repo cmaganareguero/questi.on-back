@@ -1,0 +1,25 @@
+{
+  "type": "record",
+  "namespace": "com.top.avro",
+  "name": "GenerateQuestionRequestValue",
+  "fields": [
+    {
+      "name": "difficulty",
+      "type": "string"
+    },
+    {
+      "name": "answerType",
+      "type": "string"
+    },
+    {
+      "name": "category",
+      "type": "string"
+    },
+    {
+      "name": "numQuestions",
+      "type": "int"
+    }
+  ]
+}
+
+

@@ -1,0 +1,29 @@
+server:
+    port: 7789
+
+spring:
+    config:
+        activate:
+            on-profile: default
+
+    application:
+        name: user-consumer
+
+    data:
+        mongodb:
+            uri: mongodb://localhost:27018/mongo-user
+
+    kafka:
+        consumer:
+            key-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+            value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+            properties:
+                specific.avro.reader: true # Indica que se deben utilizar clases generadas por Avro
+                schema.registry.url: http://localhost:8081 # Ajusta la URL del registro de esquemas según tu configuración
+
+logging:
+    level:
+        ROOT: INFO
+        com.top: DEBUG
+        io.confluent.kafka: ERROR
+        org.apache.kafka: ERROR

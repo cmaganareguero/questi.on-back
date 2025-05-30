@@ -1,0 +1,11 @@
+{
+  "type": "record", //objeto
+  "namespace": "com.top.avro", //paquete
+  "name": "GenerateQuestionRequestKey", //nombre
+  "fields": [  //atributos
+    {
+      "name": "id",
+      "type": "string"
+    }
+  ]
+}

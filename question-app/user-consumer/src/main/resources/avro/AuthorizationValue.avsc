@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "namespace": "com.top.avro",
+  "name": "AuthorizationValue",
+  "fields": [
+    {
+      "name": "password",
+      "type": "string"
+    }
+  ]
+}
