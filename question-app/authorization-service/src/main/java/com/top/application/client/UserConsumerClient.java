@@ -9,5 +9,5 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface  UserConsumerClient {
 
     @PostMapping("/users/validate")
-    boolean validateUser(@RequestBody AuthenticationRequest loginRequest);
+    String validateUser(@RequestBody AuthenticationRequest loginRequest);
 }

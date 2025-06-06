@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class UserAuthorization {
 
+    String id;
     String name;
     String password;
 }

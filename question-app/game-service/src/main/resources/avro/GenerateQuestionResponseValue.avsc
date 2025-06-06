@@ -41,6 +41,13 @@
             {
               "name": "correctAnswerIndex",
               "type": "int"
+            },
+            {
+              "name": "embedding",
+              "type": {
+                "type": "array",
+                "items": "float"
+              }
             }
           ]
         }

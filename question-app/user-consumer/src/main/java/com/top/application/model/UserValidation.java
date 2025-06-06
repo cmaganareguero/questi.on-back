@@ -15,8 +15,11 @@ public class   UserValidation {
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public boolean authenticate(UserAuthorization loginRequest) {
+    public String authenticate(UserAuthorization loginRequest) {
         UserConsumer user = userRepository.findUserByEmail(loginRequest.getName());
-        return user != null && bCryptPasswordEncoder.matches(loginRequest.getPassword(), user.getPassword());
+        if (user != null && bCryptPasswordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            return user.getId();
+        } else
+        { return "";}
     }
 }

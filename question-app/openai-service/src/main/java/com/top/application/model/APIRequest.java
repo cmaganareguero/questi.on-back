@@ -8,7 +8,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatGPTRequest {
+public class APIRequest {
     private String model;
     private List<Message> messages;
     private double temperature;

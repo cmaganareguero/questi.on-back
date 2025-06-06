@@ -17,9 +17,9 @@ public class AuthorizationUserController {
     UserValidation userValidation;
 
     @PostMapping("/validate")
-    public ResponseEntity<Boolean> validateUser(@RequestBody UserAuthorization loginRequest) {
-        boolean isAuthenticated = userValidation.authenticate(loginRequest);
-        return ResponseEntity.ok(isAuthenticated);
+    public ResponseEntity<String> validateUser(@RequestBody UserAuthorization loginRequest) {
+        String userId = userValidation.authenticate(loginRequest);
+        return ResponseEntity.ok(userId);
     }
 
 

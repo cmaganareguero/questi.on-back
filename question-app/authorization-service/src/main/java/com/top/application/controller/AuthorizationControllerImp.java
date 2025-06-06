@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/auth")
 @Slf4j
@@ -22,13 +24,14 @@ public class AuthorizationControllerImp {
     private JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthenticationRequest loginRequest) {
-        boolean isAuthenticated = userConsumerClient.validateUser(loginRequest);
-        if (isAuthenticated) {
-            String token = jwtTokenProvider.createToken(loginRequest.getName());
-            return ResponseEntity.ok(new AuthResponse(token));
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
-        }
+    public ResponseEntity<AuthResponse> login(@RequestBody AuthenticationRequest loginRequest) {
+        return Optional
+                .ofNullable(userConsumerClient.validateUser(loginRequest))               // Optional<String> con el id de usuario (o vacío si es null)
+                .map(idUser -> {                                                         // si existe idUser, creamos el token y el ResponseEntity
+                    String token = jwtTokenProvider.createToken(idUser);
+                    return ResponseEntity.ok(new AuthResponse(token));
+                })
+                .orElse(null);                                                           // si no hay idUser, devolvemos null
     }
+
 }

@@ -13,7 +13,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatGPTResponse {
+public class APIResponse {
     private List<Choice> choices;
 
     @Getter

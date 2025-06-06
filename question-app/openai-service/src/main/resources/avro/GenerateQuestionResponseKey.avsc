@@ -1,8 +1,8 @@
 {
-  "type": "record", //objeto
-  "namespace": "com.top.avro", //paquete
-  "name": "GenerateQuestionResponseKey", //nombre
-  "fields": [  //atributos
+  "type": "record",
+  "namespace": "com.top.avro",
+  "name": "GenerateQuestionResponseKey",
+  "fields": [
     {
       "name": "idUser",
       "type": "string"

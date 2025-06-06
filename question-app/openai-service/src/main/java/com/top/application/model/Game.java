@@ -1,7 +1,15 @@
 package com.top.application.model;
 
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.Collections;
 import java.util.List;
 
+@Getter
+@Setter
+@Builder
 public class Game {
     private String category;
     private long numQuestions;
@@ -9,7 +17,6 @@ public class Game {
     private String answerType;
     private List<Question> questions;
 
-    // Constructor
     public Game(String category, long numQuestions, String difficulty, String answerType, List<Question> questions) {
         this.category = category;
         this.numQuestions = numQuestions;
@@ -18,83 +25,36 @@ public class Game {
         this.questions = questions;
     }
 
-    // Getters and Setters
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public long getNumQuestions() {
-        return numQuestions;
-    }
-
-    public void setNumQuestions(long numQuestions) {
-        this.numQuestions = numQuestions;
-    }
-
-    public String getDifficulty() {
-        return difficulty;
-    }
-
-    public void setDifficulty(String difficulty) {
-        this.difficulty = difficulty;
-    }
-
-    public String getAnswerType() {
-        return answerType;
-    }
-
-    public void setAnswerType(String answerType) {
-        this.answerType = answerType;
-    }
-
-    public List<Question> getQuestions() {
-        return questions;
-    }
-
-    public void setQuestions(List<Question> questions) {
-        this.questions = questions;
-    }
-
-    // Clase anidada Question
+    @Getter
+    @Setter
+    @Builder
     public static class Question {
         private String question;
         private List<String> answers;
         private int correctAnswerIndex;
+        private List<Float> embedding;
 
-        // Constructor
-        public Question(String question, List<String> answers, int correctAnswerIndex) {
+        public Question(String question, List<String> answers, int correctAnswerIndex, List<Float> embedding) {
+            //this.id = id;
             this.question = question;
             this.answers = answers;
             this.correctAnswerIndex = correctAnswerIndex;
+            this.embedding = embedding;
         }
 
-        // Getters and Setters
-        public String getQuestion() {
-            return question;
+        @Override
+        public String toString() {
+            return "Question{" +
+                    "question='" + question + '\'' +
+                    ", answers=" + answers +
+                    ", correctAnswerIndex=" + correctAnswerIndex +
+                    '}';
         }
 
-        public void setQuestion(String question) {
-            this.question = question;
-        }
-
-        public List<String> getAnswers() {
-            return answers;
-        }
-
-        public void setAnswers(List<String> answers) {
-            this.answers = answers;
-        }
-
-        public int getCorrectAnswerIndex() {
-            return correctAnswerIndex;
-        }
-
-        public void setCorrectAnswerIndex(int correctAnswerIndex) {
-            this.correctAnswerIndex = correctAnswerIndex;
+        public void shuffleAnswers() {
+            String correct = answers.get(correctAnswerIndex);
+            Collections.shuffle(answers);
+            correctAnswerIndex = answers.indexOf(correct);
         }
     }
 }

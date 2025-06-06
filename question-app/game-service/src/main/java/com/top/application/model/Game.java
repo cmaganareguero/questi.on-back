@@ -1,5 +1,6 @@
 package com.top.application.model;
 
+import com.top.application.interfaces.GameState;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -26,7 +27,7 @@ public class Game {
     private int numQuestions;
     private String idUser;
     private List<Question> questions;
-
+    private String gameState;
 
     public void validate(String value) {
         if (value == null || value.isEmpty()) throw new NullPointerException("La pregunta no puede ser vacia");

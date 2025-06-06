@@ -40,6 +40,10 @@
       "type": "string"
     },
     {
+      "name": "gameState",
+      "type": "string"
+    },
+    {
       "name": "questions",
       "type": {
         "type": "array",
@@ -61,6 +65,13 @@
             {
               "name": "correctAnswerIndex",
               "type": "int"
+            },
+            {
+              "name": "embedding",
+              "type": {
+                "type": "array",
+                "items": "float"
+              }
             }
           ]
         }

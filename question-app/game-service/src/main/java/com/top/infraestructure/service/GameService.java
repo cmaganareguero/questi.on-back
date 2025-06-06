@@ -1,13 +1,13 @@
 package com.top.infraestructure.service;
 
 import com.top.application.dto.*;
+import com.top.application.interfaces.GameState;
 import com.top.application.mapper.GameMapper;
 import com.top.application.model.Game;
+import com.top.application.model.Question;
 import com.top.application.repository.GameRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -27,37 +27,33 @@ public class GameService {
     @Autowired
     GameMapper gameMapper;
 
-    public Game getLastGame(String userId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("El ID de usuario no puede ser nulo");
-        }
+    public Game getLastGame(String userId, String category) {
 
-        Optional<Game> optionalGame = Optional.ofNullable(gameRepository.findFirstByIdUserOrderByDateDesc(userId));
+        System.out.println("Recibido isUser: " + userId + " y categoria: " + category);
 
-        if (optionalGame.isPresent()) {
-            return optionalGame.get();
-        } else {
-            return new Game();
-        }
+
+        Game inProgressGame = gameRepository.findFirstByIdUserAndCategoryAndGameState(userId, category, String.valueOf(GameState.INPROGRESS));
+
+        System.out.println("Partida en progreso: " + inProgressGame);
+
+        return (inProgressGame != null) ? inProgressGame : new Game();
+
     }
 
-    public Game deleteLastGame(String userId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("El ID de usuario no puede ser nulo");
+    public Game deleteGameInProgress(String userId, String category) {
+
+
+        Game inProgressGame = getLastGame(userId, category);
+
+        System.out.println("Partida en progreso: " + inProgressGame);
+
+        if (inProgressGame != null && inProgressGame.getId() != null) {
+            gameRepository.delete(inProgressGame);
+            return inProgressGame;
         }
 
-        Optional<Game> optionalGame = Optional.ofNullable(gameRepository.findFirstByIdUserOrderByDateDesc(userId));
-
-        if (optionalGame.isPresent()) {
-            Game deletedGame = optionalGame.get();
-            gameRepository.delete(deletedGame);
-            return deletedGame;
-        } else {
-            return new Game();
-        }
+        return new Game();
     }
-
-
 
     public void updateGame(GameUpdateDto gameUpdateDto) {
         if (gameUpdateDto == null) {
@@ -70,11 +66,13 @@ public class GameService {
             Game gameExistent = optionalGame.get();
             gameExistent.setSuccesses(gameUpdateDto.getSuccesses());
             gameExistent.setFailures(gameExistent.getNumQuestions()-gameUpdateDto.getSuccesses());
+            gameExistent.setGameState(String.valueOf(GameState.COMPLETED));
             gameRepository.save(gameExistent);
         }
     }
 
-    public MonthStatisticsDto calculateMonthlyStatistics(String idUser) {
+    /*
+    public MonthStatsDto calculateMonthlyStatistics(String idUser) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime oneMonthAgo = now.minus(1, ChronoUnit.MONTHS);
 
@@ -156,7 +154,7 @@ public class GameService {
         double failureRate = calculateRate(totalMonthFailures, totalMonthQuestionsAnswered);
 
         // Construir y devolver el objeto MonthStatisticsDto
-        return MonthStatisticsDto.builder()
+        return MonthStatsDto.builder()
                 .totalQuestionsAnswered(totalMonthQuestionsAnswered)
                 .totalSuccesses(totalMonthSuccesses)
                 .totalFailures(totalMonthFailures)
@@ -165,7 +163,8 @@ public class GameService {
                 .build();
 
     }
-    public List<MonthStatisticsDto> getMonthlyStatistics(String idUser) {
+    /*
+    public List<MonthStatsDto> getMonthlyStatistics(String idUser) {
         // Mapa para almacenar los juegos agrupados por mes (clave será el mes en formato "yyyy-MM")
         Map<String, List<Game>> gamesByMonth = new TreeMap<>();
 
@@ -183,7 +182,7 @@ public class GameService {
         }
 
         // Lista para almacenar las estadísticas mensuales
-        List<MonthStatisticsDto> monthlyStatistics = new ArrayList<>();
+        List<MonthStatsDto> monthlyStatistics = new ArrayList<>();
 
         // Calcular las estadísticas por cada mes
         for (Map.Entry<String, List<Game>> entry : gamesByMonth.entrySet()) {
@@ -204,7 +203,7 @@ public class GameService {
             double failureRate = calculateRate(totalMonthFailures, totalMonthQuestionsAnswered);
 
             // Crear el DTO para el mes y agregarlo a la lista
-            MonthStatisticsDto monthStats = MonthStatisticsDto.builder()
+            MonthStatsDto monthStats = MonthStatsDto.builder()
                     .month(month)  // Establecer el mes
                     .totalQuestionsAnswered(totalMonthQuestionsAnswered)
                     .totalSuccesses(totalMonthSuccesses)
@@ -219,7 +218,6 @@ public class GameService {
         // Retornar la lista de estadísticas mensuales
         return monthlyStatistics;
     }
-
 
     public List<WeekStatisticsDto> getWeeklyStatistics(String idUser) {
         Map<String, WeekStatisticsDto> weekStatsMap = new TreeMap<>();
@@ -277,6 +275,7 @@ public class GameService {
 
         return new ArrayList<>(weekStatsMap.values());
     }
+    */
 
     public Map<String, DifficultyStatisticsDto> getStatisticsByDifficulty(String idUser) {
 
@@ -407,4 +406,149 @@ public class GameService {
         return total > 0 ? (double) count / total * 100 : 0;
     }
 
+    public List<List<Float>> getEmbeddingsFromRecentGames(String category, int sampleSize) {
+
+        List<Game> recentGames = gameRepository.findLastFiveGamesByCategoryOrderByDateDesc(category);
+        // 2. Extraer todas las preguntas (embeddings) de esas partidas
+        List<List<Float>> allEmbeddings = new ArrayList<>();
+        for (Game g : recentGames) {
+            for (Question q : g.getQuestions()) {
+                if (q.getEmbedding() != null && !q.getEmbedding().isEmpty()) {
+                    allEmbeddings.add(q.getEmbedding());
+                }
+            }
+        }
+        // 3. Si hay menos vectores que sampleSize, devolvemos todo; si no, barajamos y tomamos sampleSize
+        if (allEmbeddings.size() <= sampleSize) {
+            return allEmbeddings;
+        }
+        Collections.shuffle(allEmbeddings);
+        return allEmbeddings.subList(0, sampleSize);
+    }
+
+    public List<MonthGamesDto> getGamesCountPerMonthCurrentYear(String idUser) {
+        List<Game> allGamesOfUser = gameRepository.findGamesByIdUser(idUser);
+        System.out.println("Total games for user " + idUser + ": " + allGamesOfUser.size());
+
+        int currentYear = LocalDateTime.now().getYear();
+        System.out.println("Current year: " + currentYear);
+
+        List<Game> gamesThisYear = allGamesOfUser.stream()
+                .filter(g -> {
+                    LocalDateTime date = g.getDate();
+                    boolean match = date != null && date.getYear() == currentYear;
+                    if (!match) {
+                        System.out.println("Excluding game with date " + date);
+                    }
+                    return match;
+                })
+                .collect(Collectors.toList());
+        System.out.println("Games in year " + currentYear + ": " + gamesThisYear.size());
+
+        Map<String, Long> gamesByMonth = gamesThisYear.stream()
+                .collect(Collectors.groupingBy(
+                        g -> {
+                            String monthKey = g.getDate().toLocalDate().toString().substring(0, 7);
+                            System.out.println("Mapping game dated " + g.getDate() + " to month " + monthKey);
+                            return monthKey;
+                        },
+                        TreeMap::new,
+                        Collectors.counting()
+                ));
+        System.out.println("Grouped games by month:");
+        gamesByMonth.forEach((month, count) ->
+                System.out.println("  Month: " + month + " -> Count: " + count)
+        );
+
+        List<MonthGamesDto> result = new ArrayList<>();
+        for (Map.Entry<String, Long> entry : gamesByMonth.entrySet()) {
+            String month = entry.getKey();
+            int count = entry.getValue().intValue();
+            System.out.println("Adding DTO - month: " + month + ", gamesCount: " + count);
+            result.add(
+                    MonthGamesDto.builder()
+                            .month(month)
+                            .gamesCount(count)
+                            .build()
+            );
+        }
+
+        System.out.println("Final result size: " + result.size());
+        return result;
+    }
+
+    public StatsGeneralesDto getTotalsStatistics(String idUser) {
+        List<Game> allGames = gameRepository.findGamesByIdUser(idUser);
+
+        int totalGames = allGames.size();
+        int totalSuccesses = allGames.stream().mapToInt(Game::getSuccesses).sum();
+        int totalFailures  = allGames.stream().mapToInt(Game::getFailures).sum();
+
+        return StatsGeneralesDto.builder()
+                .totalGames(totalGames)
+                .totalSuccesses(totalSuccesses)
+                .totalFailures(totalFailures)
+                .build();
+    }
+
+    public List<MonthStatsDto> getSuccessFailureByMonthCurrentYear(String idUser) {
+        int currentYear = LocalDateTime.now().getYear();
+
+        // 1) Traer todas las partidas del usuario
+        List<Game> allGames = gameRepository.findGamesByIdUser(idUser);
+
+        // 2) Filtrar solo las del año actual
+        List<Game> gamesThisYear = allGames.stream()
+                .filter(g -> {
+                    LocalDateTime d = g.getDate();
+                    return d != null && d.getYear() == currentYear;
+                })
+                .collect(Collectors.toList());
+
+        // 3) Formateador para "yyyy-MM"
+        DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("yyyy-MM");
+
+        // 4) Agrupar por mes y acumular éxitos/fallos/preguntas
+        Map<String, List<Game>> gamesGroupedByMonth = gamesThisYear.stream()
+                .collect(Collectors.groupingBy(
+                        g -> g.getDate().toLocalDate().format(monthFormatter),
+                        TreeMap::new,
+                        Collectors.toList()
+                ));
+
+        List<MonthStatsDto> result = new ArrayList<>();
+        for (Map.Entry<String, List<Game>> entry : gamesGroupedByMonth.entrySet()) {
+            String monthKey = entry.getKey();
+            List<Game> gamesInMonth = entry.getValue();
+
+            int totalQuestionsAnswered = gamesInMonth.stream()
+                    .mapToInt(g -> g.getSuccesses() + g.getFailures())
+                    .sum();
+            int totalSuccesses = gamesInMonth.stream()
+                    .mapToInt(Game::getSuccesses)
+                    .sum();
+            int totalFailures = gamesInMonth.stream()
+                    .mapToInt(Game::getFailures)
+                    .sum();
+
+            double successRate = calculateRate(totalSuccesses, totalQuestionsAnswered);
+            double failureRate = calculateRate(totalFailures, totalQuestionsAnswered);
+
+            MonthStatsDto monthDto = MonthStatsDto.builder()
+                    .month(monthKey)
+                    .totalMonthQuestionsAnswered(totalQuestionsAnswered)
+                    .totalMonthSuccesses(totalSuccesses)
+                    .totalMonthFailures(totalFailures)
+                    .successMonthRate(successRate)
+                    .failureMonthRate(failureRate)
+                    .build();
+
+            result.add(monthDto);
+        }
+
+        return result;
+    }
+
+
 }
+

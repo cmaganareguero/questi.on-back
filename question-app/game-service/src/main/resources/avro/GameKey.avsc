@@ -1,8 +1,8 @@
 {
-  "type": "record", //objeto
-  "namespace": "com.top.avro", //paquete
-  "name": "GameKey", //nombre
-  "fields": [  //atributos
+  "type": "record",
+  "namespace": "com.top.avro",
+  "name": "GameKey",
+  "fields": [
     {
       "name": "id",
       "type": "string"

@@ -37,7 +37,8 @@ spring:
 chatgpt:
   api:
     url: https://api.openai.com/v1/chat/completions
-    key: "<REMOVED>"
+    embeddings: https://api.openai.com/v1/embeddings
+    key: "key secreta"
 
 logging:
   level:
@@ -45,3 +46,7 @@ logging:
     com.top: DEBUG
     io.confluent.kafka: ERROR
     org.apache.kafka: ERROR
+
+game:
+  service:
+    url: http://localhost:7785/game
