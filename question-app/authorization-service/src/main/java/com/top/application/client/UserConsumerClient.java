@@ -5,9 +5,12 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "user-consumer", url = "http://localhost:7789")
+@FeignClient(name = "user-consumer", url="http://localhost:7789")
 public interface  UserConsumerClient {
 
     @PostMapping("/users/validate")
     String validateUser(@RequestBody AuthenticationRequest loginRequest);
 }
+
+
+

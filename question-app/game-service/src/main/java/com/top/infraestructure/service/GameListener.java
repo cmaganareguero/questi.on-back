@@ -30,7 +30,6 @@ public class GameListener {
 
     @Autowired
     GameKafkaMapper gameKafkaMapper;
-
     @Autowired
     GameRepository gameRepository;
 

@@ -38,7 +38,7 @@ chatgpt:
   api:
     url: https://api.openai.com/v1/chat/completions
     embeddings: https://api.openai.com/v1/embeddings
-    key: "key secreta"
+    key: "key"
 
 logging:
   level:

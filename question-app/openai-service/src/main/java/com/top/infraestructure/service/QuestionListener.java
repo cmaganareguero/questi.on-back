@@ -21,28 +21,11 @@ import java.util.UUID;
 public class QuestionListener {
 
     private static final String API_RESPONSE_TOPIC = "api-response";
-
     @Autowired
     private KafkaTemplate<GenerateQuestionResponseKey, GenerateQuestionResponseValue> kafkaTemplateResponse;
-
     @Autowired
     private APIService apiService;
 
-    /**
-     * Escucha en el topic "api-request". Cuando recibe un mensaje que contiene:
-     *   - key: GenerateQuestionRequestKey (con userId en getId())
-     *   - value: GenerateQuestionRequestValue (con categoría, dificultad, numQuestions, answerType)
-     *
-     * Llama a APIService.generateQuestionsWithEmbeddings(...) para:
-     *   1. Solicitar X preguntas a ChatGPT.
-     *   2. Calcular el embedding de cada pregunta.
-     *   3. Devolver List<Game.Question> con cada pregunta + su vector de embedding.
-     *
-     * A continuación envía esa lista por Kafka al topic "api-response", en un GenerateQuestionResponseValue
-     * que contiene:
-     *   - category, numQuestions, difficulty, answerType
-     *   - questions: array de registros Avro, cada uno con campos: question, answers, correctAnswerIndex, embedding.
-     */
     @KafkaListener(topics = "api-request", groupId = "api-request")
     public void consumeFromTopicUser(ConsumerRecord<GenerateQuestionRequestKey, GenerateQuestionRequestValue> record) {
         GenerateQuestionRequestKey key = record.key();
@@ -51,15 +34,14 @@ public class QuestionListener {
         log.info("Received message from topic api-request with key: {} and value: {}", key, value);
 
         try {
-            // Extraemos userId directamente del GenerateQuestionRequestKey
             String userId = key.getId();
 
-            // Llamada al nuevo método: genera preguntas + embeddings
             List<Game.Question> questions = apiService.generateQuestionsWithEmbeddings(
                     value.getCategory(),
                     value.getDifficulty(),
                     value.getNumQuestions(),
-                    value.getAnswerType()
+                    value.getAnswerType(),
+                    500
             );
 
             sendResponseToKafka(key, value, questions);
@@ -69,11 +51,7 @@ public class QuestionListener {
         }
     }
 
-    /**
-     * Construye el mensaje Avro de salida (GenerateQuestionResponseValue) y lo envía
-     * al topic "api-response". Mapea cada Game.Question a com.top.avro.Question,
-     * incluyendo el campo embedding (array de floats).
-     */
+
     private void sendResponseToKafka(
             GenerateQuestionRequestKey key,
             GenerateQuestionRequestValue value,
@@ -93,10 +71,7 @@ public class QuestionListener {
         kafkaTemplateResponse.send(API_RESPONSE_TOPIC, responseKey, responseValue);
     }
 
-    /**
-     * Mapea cada Game.Question (Java) a com.top.avro.Question (Avro),
-     * copiando: question, answers, correctAnswerIndex y embedding (lista de floats).
-     */
+
     private List<com.top.avro.Question> mapToAvroQuestions(List<Game.Question> questions) {
         List<com.top.avro.Question> avroQuestions = new ArrayList<>();
         for (Game.Question question : questions) {
@@ -105,10 +80,6 @@ public class QuestionListener {
             avroQuestion.setQuestion(question.getQuestion());
             avroQuestion.setAnswers(question.getAnswers());
             avroQuestion.setCorrectAnswerIndex(question.getCorrectAnswerIndex());
-
-            // Aquí asignamos el campo embedding (List<Float>) al array<float> de Avro
-            // Asegúrate de que tu esquema Avro para Question tenga:
-            //   { "name": "embedding", "type": { "type": "array", "items": "float" } }
             avroQuestion.setEmbedding(question.getEmbedding());
 
             avroQuestions.add(avroQuestion);

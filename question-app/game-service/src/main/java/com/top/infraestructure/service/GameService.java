@@ -30,23 +30,15 @@ public class GameService {
     public Game getLastGame(String userId, String category) {
 
         System.out.println("Recibido isUser: " + userId + " y categoria: " + category);
-
-
         Game inProgressGame = gameRepository.findFirstByIdUserAndCategoryAndGameState(userId, category, String.valueOf(GameState.INPROGRESS));
-
         System.out.println("Partida en progreso: " + inProgressGame);
-
         return (inProgressGame != null) ? inProgressGame : new Game();
 
     }
 
     public Game deleteGameInProgress(String userId, String category) {
-
-
         Game inProgressGame = getLastGame(userId, category);
-
         System.out.println("Partida en progreso: " + inProgressGame);
-
         if (inProgressGame != null && inProgressGame.getId() != null) {
             gameRepository.delete(inProgressGame);
             return inProgressGame;
@@ -71,212 +63,6 @@ public class GameService {
         }
     }
 
-    /*
-    public MonthStatsDto calculateMonthlyStatistics(String idUser) {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime oneMonthAgo = now.minus(1, ChronoUnit.MONTHS);
-
-        // Obtener todos los juegos del último mes para el usuario
-        List<Game> games = gameRepository.findByIdUserAndDateGreaterThanEqual(idUser, oneMonthAgo);
-        System.out.println("iduser: " + idUser);  // Verifica si se están obteniendo juegos
-        System.out.println("Juegos obtenidos: " + games);  // Verifica si se están obteniendo juegos
-
-        for (Game game : games) {
-            LocalDateTime gameDate = game.getDate();
-            int weekOfYear = gameDate.get(ChronoField.ALIGNED_WEEK_OF_YEAR);
-            int year = gameDate.getYear();
-            System.out.println("Fecha del juego: " + gameDate + ", Semana del año: " + weekOfYear + ", Año: " + year);
-        }
-
-        // Estructura para almacenar estadísticas semanales
-        Map<String, WeekStatisticsDto> weekStatsMap = new TreeMap<>();
-
-        // Calcular estadísticas por semana y día
-        for (Game game : games) {
-            LocalDateTime gameDate = game.getDate();
-            int weekOfYear = gameDate.get(ChronoField.ALIGNED_WEEK_OF_YEAR);
-            int year = gameDate.getYear();
-
-            // Formato "año-semana" para la clave del mapa
-            String weekKey = String.format("%d-%02d", year, weekOfYear);
-
-            // Obtener o inicializar las estadísticas de la semana
-            WeekStatisticsDto weekStats = weekStatsMap.getOrDefault(weekKey, WeekStatisticsDto.builder().build());
-
-            // Actualizar las estadísticas de la semana
-            weekStats.setTotalWeekQuestionsAnswered(weekStats.getTotalWeekQuestionsAnswered() + game.getSuccesses() + game.getFailures());
-            weekStats.setTotalWeekSuccesses(weekStats.getTotalWeekSuccesses() + game.getSuccesses());
-            weekStats.setTotalWeekFailures(weekStats.getTotalWeekFailures() + game.getFailures());
-
-            // Obtener o inicializar la lista de días para la semana actual
-            List<DayWeekStatsDto> dayStatsList = weekStats.getDayStatsList();
-            if (dayStatsList == null) {
-                dayStatsList = new ArrayList<>();
-                weekStats.setDayStatsList(dayStatsList);
-            }
-
-            // Formato "año-mes-día" para la clave del mapa
-            String dayKey = gameDate.toLocalDate().toString();
-
-            // Obtener o inicializar las estadísticas del día
-            DayWeekStatsDto dayStats = dayStatsList.stream()
-                    .filter(day -> day.getDay().equals(dayKey))
-                    .findFirst()
-                    .orElse(DayWeekStatsDto.builder().day(dayKey).build());
-
-            // Actualizar las estadísticas del día
-            dayStats.setTotalDayQuestionsAnswered(dayStats.getTotalDayQuestionsAnswered() + game.getSuccesses() + game.getFailures());
-            dayStats.setTotalDaySuccesses(dayStats.getTotalDaySuccesses() + game.getSuccesses());
-            dayStats.setTotalDayFailures(dayStats.getTotalDayFailures() + game.getFailures());
-
-            // Agregar el día al listado de días de la semana
-            if (!dayStatsList.contains(dayStats)) {
-                dayStatsList.add(dayStats);
-            }
-
-            // Actualizar la semana en el mapa
-            weekStatsMap.put(weekKey, weekStats);
-        }
-
-        // Calcular estadísticas mensuales
-        int totalMonthQuestionsAnswered = 0;
-        int totalMonthSuccesses = 0;
-        int totalMonthFailures = 0;
-
-        for (WeekStatisticsDto weekStats : weekStatsMap.values()) {
-            totalMonthQuestionsAnswered += weekStats.getTotalWeekQuestionsAnswered();
-            totalMonthSuccesses += weekStats.getTotalWeekSuccesses();
-            totalMonthFailures += weekStats.getTotalWeekFailures();
-        }
-
-        // Calcular tasas de éxito y fallo mensual
-        double successRate = calculateRate(totalMonthSuccesses, totalMonthQuestionsAnswered);
-        double failureRate = calculateRate(totalMonthFailures, totalMonthQuestionsAnswered);
-
-        // Construir y devolver el objeto MonthStatisticsDto
-        return MonthStatsDto.builder()
-                .totalQuestionsAnswered(totalMonthQuestionsAnswered)
-                .totalSuccesses(totalMonthSuccesses)
-                .totalFailures(totalMonthFailures)
-                .successRate(successRate)
-                .failureRate(failureRate)
-                .build();
-
-    }
-    /*
-    public List<MonthStatsDto> getMonthlyStatistics(String idUser) {
-        // Mapa para almacenar los juegos agrupados por mes (clave será el mes en formato "yyyy-MM")
-        Map<String, List<Game>> gamesByMonth = new TreeMap<>();
-
-        // Formateador para obtener "yyyy-MM" a partir de una fecha
-        DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("yyyy-MM");
-
-        List<Game> games = gameRepository.findGamesByIdUser(idUser);
-        System.out.println("iduser: " + idUser);  // Verifica si se están obteniendo juegos
-        System.out.println("Juegos obtenidos: " + games);  // Verifica si se están obteniendo juegos
-
-        // Agrupar los juegos por mes
-        for (Game game : games) {
-            String monthKey = game.getDate().format(monthFormatter);
-            gamesByMonth.computeIfAbsent(monthKey, k -> new ArrayList<>()).add(game);
-        }
-
-        // Lista para almacenar las estadísticas mensuales
-        List<MonthStatsDto> monthlyStatistics = new ArrayList<>();
-
-        // Calcular las estadísticas por cada mes
-        for (Map.Entry<String, List<Game>> entry : gamesByMonth.entrySet()) {
-            String month = entry.getKey();
-            List<Game> gamesInMonth = entry.getValue();
-
-            int totalMonthQuestionsAnswered = 0;
-            int totalMonthSuccesses = 0;
-            int totalMonthFailures = 0;
-
-            for (Game game : gamesInMonth) {
-                totalMonthQuestionsAnswered += game.getSuccesses() + game.getFailures();
-                totalMonthSuccesses += game.getSuccesses();
-                totalMonthFailures += game.getFailures();
-            }
-
-            double successRate = calculateRate(totalMonthSuccesses, totalMonthQuestionsAnswered);
-            double failureRate = calculateRate(totalMonthFailures, totalMonthQuestionsAnswered);
-
-            // Crear el DTO para el mes y agregarlo a la lista
-            MonthStatsDto monthStats = MonthStatsDto.builder()
-                    .month(month)  // Establecer el mes
-                    .totalQuestionsAnswered(totalMonthQuestionsAnswered)
-                    .totalSuccesses(totalMonthSuccesses)
-                    .totalFailures(totalMonthFailures)
-                    .successRate(successRate)
-                    .failureRate(failureRate)
-                    .build();
-
-            monthlyStatistics.add(monthStats);
-        }
-
-        // Retornar la lista de estadísticas mensuales
-        return monthlyStatistics;
-    }
-
-    public List<WeekStatisticsDto> getWeeklyStatistics(String idUser) {
-        Map<String, WeekStatisticsDto> weekStatsMap = new TreeMap<>();
-
-        List<Game> games = gameRepository.findGamesByIdUser(idUser);
-        System.out.println("iduser: " + idUser);  // Verifica si se están obteniendo juegos
-        System.out.println("Juegos obtenidos: " + games);  // Verifica si se están obteniendo juegos
-
-        for (Game game : games) {
-            LocalDateTime gameDate = game.getDate();
-            int weekOfYear = gameDate.get(ChronoField.ALIGNED_WEEK_OF_YEAR);
-            int year = gameDate.getYear();
-            String weekKey = String.format("%d-%02d", year, weekOfYear);
-
-            WeekStatisticsDto weekStats = weekStatsMap.getOrDefault(weekKey, WeekStatisticsDto.builder().build());
-
-            weekStats.setTotalWeekQuestionsAnswered(weekStats.getTotalWeekQuestionsAnswered() + game.getSuccesses() + game.getFailures());
-            weekStats.setTotalWeekSuccesses(weekStats.getTotalWeekSuccesses() + game.getSuccesses());
-            weekStats.setTotalWeekFailures(weekStats.getTotalWeekFailures() + game.getFailures());
-
-            // Actualizar estadísticas por día
-            List<DayWeekStatsDto> dayStatsList = weekStats.getDayStatsList();
-            if (dayStatsList == null) {
-                dayStatsList = new ArrayList<>();
-                weekStats.setDayStatsList(dayStatsList);
-            }
-
-            String dayKey = gameDate.toLocalDate().toString();
-            DayWeekStatsDto dayStats = dayStatsList.stream()
-                    .filter(day -> day.getDay().equals(dayKey))
-                    .findFirst()
-                    .orElse(DayWeekStatsDto.builder().day(dayKey).build());
-
-            dayStats.setTotalDayQuestionsAnswered(dayStats.getTotalDayQuestionsAnswered() + game.getSuccesses() + game.getFailures());
-            dayStats.setTotalDaySuccesses(dayStats.getTotalDaySuccesses() + game.getSuccesses());
-            dayStats.setTotalDayFailures(dayStats.getTotalDayFailures() + game.getFailures());
-
-            if (!dayStatsList.contains(dayStats)) {
-                dayStatsList.add(dayStats);
-            }
-
-            weekStatsMap.put(weekKey, weekStats);
-        }
-
-        // Calcular la tasa de éxito/fallo semanal
-        for (WeekStatisticsDto weekStats : weekStatsMap.values()) {
-            int totalQuestions = weekStats.getTotalWeekQuestionsAnswered();
-            if (totalQuestions > 0) {
-                double successRate = calculateRate(weekStats.getTotalWeekSuccesses(), totalQuestions);
-                double failureRate = calculateRate(weekStats.getTotalWeekFailures(), totalQuestions);
-                weekStats.setSuccessWeekRate(successRate);
-                weekStats.setFailureWeekRate(failureRate);
-            }
-        }
-
-        return new ArrayList<>(weekStatsMap.values());
-    }
-    */
-
     public Map<String, DifficultyStatisticsDto> getStatisticsByDifficulty(String idUser) {
 
         List<Game> games = gameRepository.findGamesByIdUser(idUser);
@@ -299,8 +85,6 @@ public class GameService {
 
         return difficultyStatsMap;
     }
-
-
 
     public List<UserGamesDto> getGamesByIdUser(String userEmail) {
         List<Game> games = gameRepository.findGamesByIdUser(userEmail);

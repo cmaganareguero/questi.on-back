@@ -69,12 +69,13 @@ services:
   schema-registry:
     image: confluentinc/cp-schema-registry:6.1.1
     container_name: moodle-schema-registry
+    platform: linux/amd64  # Solo si tu máquina es ARM/M1/M2/WSL2 ARM
     ports:
       - "8081:8081"
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
-      SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
     depends_on:
       - kafka
     restart: always

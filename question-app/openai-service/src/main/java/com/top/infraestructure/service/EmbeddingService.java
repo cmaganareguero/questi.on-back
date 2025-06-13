@@ -22,10 +22,8 @@ import java.util.List;
 @Service
 @Slf4j
 public class EmbeddingService {
-
     @Value("${chatgpt.api.embeddings}")
     private String embeddingsApiUrl;
-
     @Value("${chatgpt.api.key}")
     private String apiKey;
 
@@ -38,43 +36,30 @@ public class EmbeddingService {
     }
 
     /**
-     * Genera un embedding para un solo texto (método antiguo, se conserva para compatibilidad).
-     */
-    public float[] getEmbedding(String texto) throws JsonProcessingException {
-        List<String> inputs = new ArrayList<>();
-        inputs.add(texto);
-        List<float[]> lista = getEmbeddings(inputs);
-        return lista.isEmpty() ? new float[0] : lista.get(0);
-    }
-
-    /**
-     * (Nuevo) Genera embeddings para una lista de textos en una sola petición.
-     *
-     * @param textos Lista de cadenas para las que se quiere el embedding.
-     * @return Lista de arrays float[], cada uno correspondiente al embedding de cada texto en el mismo orden.
+     * Genera embeddings para una lista de textos.
+     * Devuelve una lista de float[] (embedding completo por texto).
      */
     public List<float[]> getEmbeddings(List<String> textos) throws JsonProcessingException {
         if (textos == null || textos.isEmpty()) {
+            log.warn("Lista de textos vacía.");
             return new ArrayList<>();
         }
 
-        // 1. Construir el cuerpo de la petición: modelo + lista de inputs
+        long tStartRequest = System.currentTimeMillis();
+
         EmbeddingRequest requestBody = EmbeddingRequest.builder()
                 .model("text-embedding-3-small")
                 .input(textos)
                 .build();
 
-        // 2. Convertir a JSON
         String jsonRequest = objectMapper.writeValueAsString(requestBody);
 
-        // 3. Cabeceras HTTP
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + apiKey);
         headers.set("Content-Type", "application/json");
 
         HttpEntity<String> entity = new HttpEntity<>(jsonRequest, headers);
 
-        // 4. Llamada al endpoint de embeddings de OpenAI
         ResponseEntity<String> response = restTemplate.exchange(
                 embeddingsApiUrl,
                 HttpMethod.POST,
@@ -82,11 +67,12 @@ public class EmbeddingService {
                 String.class
         );
 
-        // 5. Leer la respuesta como cadena y deserializar a EmbeddingResponse
+        long tEndRequest = System.currentTimeMillis();
+        log.info("[EmbeddingService] Tiempo petición OpenAI: {} ms", (tEndRequest - tStartRequest));
+
         String responseBody = response.getBody();
         EmbeddingResponse embeddingResponse = objectMapper.readValue(responseBody, EmbeddingResponse.class);
 
-        // 6. Extraer y convertir cada embedding de Float a float[]
         List<float[]> resultados = new ArrayList<>();
         for (EmbeddingResponse.EmbeddingDatum d : embeddingResponse.getData()) {
             List<Float> vector = d.getEmbedding();
@@ -96,7 +82,36 @@ public class EmbeddingService {
             }
             resultados.add(arr);
         }
-
         return resultados;
+    }
+
+    /**
+     * Genera y almacena los N primeros valores del embedding para una lista de textos (para pruebas).
+     */
+    public List<float[]> generateAndStoreEmbeddings(List<String> textos, int n) throws JsonProcessingException {
+        List<float[]> embeddings = getEmbeddings(textos);
+        List<float[]> resultadosReducidos = new ArrayList<>();
+
+        long tStartStore = System.currentTimeMillis();
+
+        for (float[] vector : embeddings) {
+            int dim = Math.min(n, vector.length);
+            float[] arr = new float[dim];
+            System.arraycopy(vector, 0, arr, 0, dim);
+            storeEmbedding(arr); // Simulación de guardado
+            resultadosReducidos.add(arr);
+        }
+
+        long tEndStore = System.currentTimeMillis();
+        log.info("[EmbeddingService] Tiempo almacenamiento embeddings: {} ms", (tEndStore - tStartStore));
+
+        return resultadosReducidos;
+    }
+
+    /**
+     * Simula el almacenamiento del embedding (sustituye por tu lógica de persistencia real).
+     */
+    private void storeEmbedding(float[] embedding) {
+        // Aquí meterías tu lógica de base de datos.
     }
 }

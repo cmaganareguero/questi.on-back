@@ -44,30 +44,6 @@ public class GameControllerImpl implements GameController {
             log.error(e.getMessage());
         }
     }
-    /*
-    @GetMapping(value = "/getMonthlyStatistics")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public List<MonthStatsDto> getMonthlyStatistics(@RequestParam String idUser) {
-        try {
-            return gameService.getMonthlyStatistics(idUser);
-        } catch (NullPointerException e) {
-            log.error(e.getMessage());
-        }
-        return null;
-    }
-    */
-    /*
-    @GetMapping(value = "/getWeeklyStats")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public WeekStatisticsDto getWeeklyStats(@RequestParam String idUser) {
-        try {
-            return gameService.calculateWeeklyStatistics(idUser);
-        } catch (NullPointerException e) {
-            log.error(e.getMessage());
-        }
-        return null;
-    }
-    */
 
     @GetMapping(value = "/getStatisticsByDifficulty")
     @ResponseStatus(HttpStatus.ACCEPTED)

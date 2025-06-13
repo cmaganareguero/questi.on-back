@@ -19,19 +19,22 @@ public class AuthorizationControllerImp {
 
     @Autowired
     private UserConsumerClient userConsumerClient;
-
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthenticationRequest loginRequest) {
         return Optional
-                .ofNullable(userConsumerClient.validateUser(loginRequest))               // Optional<String> con el id de usuario (o vacío si es null)
-                .map(idUser -> {                                                         // si existe idUser, creamos el token y el ResponseEntity
+                .ofNullable(userConsumerClient.validateUser(loginRequest))
+                .map(idUser -> {
                     String token = jwtTokenProvider.createToken(idUser);
                     return ResponseEntity.ok(new AuthResponse(token));
                 })
-                .orElse(null);                                                           // si no hay idUser, devolvemos null
+                .orElse(null);
     }
 
 }
+
+
+
+
