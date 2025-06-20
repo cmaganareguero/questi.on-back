@@ -15,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 public class APIResponse {
     private List<Choice> choices;
+    private Usage usage; // Añadido campo para el conteo de tokens
 
     @Getter
     @Setter
@@ -31,7 +32,17 @@ public class APIResponse {
         @JsonIgnoreProperties(ignoreUnknown = true)
         public static class Message {
             private String content;
-
         }
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Usage {
+        private int prompt_tokens;
+        private int completion_tokens;
+        private int total_tokens;
     }
 }

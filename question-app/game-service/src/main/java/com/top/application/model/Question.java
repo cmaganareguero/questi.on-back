@@ -10,9 +10,12 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Question {
+    private String id;
     private String question;
     private List<String> answers;
     private int correctAnswerIndex;
     private List<Float> embedding;
+    private Integer selectedAnswerIndex;
+
 
 }

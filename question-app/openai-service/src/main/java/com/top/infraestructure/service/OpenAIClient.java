@@ -3,6 +3,7 @@ package com.top.infraestructure.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.top.application.dto.TextModelResponseDTO;
 import com.top.application.model.APIRequest;
 import com.top.application.model.APIResponse;
 import com.top.application.model.Game;
@@ -40,14 +41,22 @@ public class OpenAIClient {
             double topP
     ) throws JsonProcessingException {
         String runId = UUID.randomUUID().toString().substring(0, 8);
-        String prompt = promptService.buildPromptTemplate(category, difficulty, answerType, batchSize, runId);
-        log.info("[callOpenAI] Usando prompt:\n{}", prompt);
 
+        // 1. Construcción del prompt
+        String prompt = promptService.buildPromptTemplate(category, difficulty, answerType, batchSize, runId);
+        log.info("[callOpenAI] ===== Generación de preguntas =====");
+        log.info("[callOpenAI] Categoría: {}, Dificultad: {}, Tipo respuesta: {}, Nº preguntas: {}, RunID: {}",
+                category, difficulty, answerType, batchSize, runId);
+        log.info("[callOpenAI] Prompt generado:\n{}", prompt);
+
+        // 2. Construcción del request JSON
         APIRequest req = buildModelGpt4o(prompt, temperature, topP);
         String jsonReq = objectMapper.writeValueAsString(req);
-        log.info("[callOpenAI] JSON de request a ChatGPT (primeros 200 chars): {}...",
+        log.debug("[callOpenAI] JSON de request enviado a ChatGPT (primeros 200 chars): {}...",
                 jsonReq.length() > 200 ? jsonReq.substring(0, 200) : jsonReq);
 
+        // 3. Preparación y envío de la petición HTTP
+        log.info("[callOpenAI] Enviando petición POST a la API de OpenAI...");
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + apiKey);
         headers.set("Content-Type", "application/json");
@@ -56,33 +65,58 @@ public class OpenAIClient {
         ResponseEntity<String> response = restTemplate.exchange(
                 apiUrl, HttpMethod.POST, request, String.class
         );
-        String content = extractContentFromResponse(response.getBody());
-        log.info("[callOpenAI] Contenido crudo recibido de ChatGPT (primeros 300 chars): {}...",
+
+        // 4. Procesamiento de la respuesta
+        TextModelResponseDTO result = extractContentFromResponse(response.getBody());
+        String content = result.getContent();
+        int promptTokens = result.getPromptTokens();
+        int completionTokens = result.getCompletionTokens();
+        int totalTokens = result.getTotalTokens();
+
+        log.info("[callOpenAI] ----- Resumen de tokens consumidos -----");
+        log.info("[callOpenAI] Prompt tokens (entrada): {}", promptTokens);
+        log.info("[callOpenAI] Completion tokens (salida): {}", completionTokens);
+        log.info("[callOpenAI] Total tokens usados: {}", totalTokens);
+
+        log.info("[callOpenAI] Contenido crudo recibido de ChatGPT (primeros 300 chars):\n{}...",
                 content.length() > 300 ? content.substring(0, 300) : content);
 
-        return parseQuestionsFromContent(content);
+        // 5. Parseo de las preguntas generadas
+        List<Game.Question> questions = parseQuestionsFromContent(content);
+        log.info("[callOpenAI] Preguntas generadas y parseadas: {}", questions.size());
+        log.info("[callOpenAI] ===== Fin de la generación =====");
+
+        return questions;
     }
 
     private APIRequest buildModelGpt4o(String content, double temperature, double topP) {
         return APIRequest.builder()
-                .model("gpt-4o-mini")
+                .model("gpt-3.5-turbo")
                 .messages(Arrays.asList(
                         new APIRequest.Message("system", content),
-                        new APIRequest.Message("user", "Question game")
+                        new APIRequest.Message("user", "Juego de preguntas")
                 ))
                 .temperature(temperature)
                 .top_p(topP)
-                .max_tokens(1200)
+                .max_tokens(1000)
                 .build();
     }
 
-    private String extractContentFromResponse(String responseBody) throws JsonProcessingException {
+    private TextModelResponseDTO extractContentFromResponse(String responseBody) throws JsonProcessingException {
         APIResponse chatGPTResponse = objectMapper.readValue(responseBody, APIResponse.class);
-        return chatGPTResponse.getChoices().stream()
+
+        String content = chatGPTResponse.getChoices().stream()
                 .findFirst()
                 .map(APIResponse.Choice::getMessage)
                 .map(APIResponse.Choice.Message::getContent)
                 .orElseThrow(() -> new RuntimeException("No content found in response"));
+
+        APIResponse.Usage usage = chatGPTResponse.getUsage();
+        int promptTokens = usage != null ? usage.getPrompt_tokens() : 0;
+        int completionTokens = usage != null ? usage.getCompletion_tokens() : 0;
+        int totalTokens = usage != null ? usage.getTotal_tokens() : 0;
+
+        return new TextModelResponseDTO(content, promptTokens, completionTokens, totalTokens);
     }
 
     /**
@@ -123,9 +157,11 @@ public class OpenAIClient {
             }
             int idx = indiceNode.asInt();
             Game.Question q = Game.Question.builder()
+                    .id(UUID.randomUUID().toString())
                     .question(texto)
                     .answers(opciones)
                     .correctAnswerIndex(idx)
+                    .selectedAnswerIndex(null)
                     .embedding(null)
                     .build();
             preguntas.add(q);
@@ -154,7 +190,11 @@ public class OpenAIClient {
         ResponseEntity<String> response = restTemplate.exchange(
                 apiUrl, HttpMethod.POST, requestEntity, String.class
         );
-        String content = extractContentFromResponse(response.getBody());
+        TextModelResponseDTO result = extractContentFromResponse(response.getBody());
+        String content = result.getContent();
+        int promptTokens = result.getPromptTokens();
+        int completionTokens = result.getCompletionTokens();
+        int totalTokens = result.getTotalTokens();
         log.info("[getMoreInfo] Respuesta de ChatGPT: {}", content);
         return content;
     }

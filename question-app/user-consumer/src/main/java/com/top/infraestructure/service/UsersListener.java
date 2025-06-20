@@ -30,11 +30,7 @@ public class UsersListener {
                         .id(key.getId())
                         .name(value.getName())
                         .email(value.getEmail())
-                        .gender(value.getGender())
-                        .birthDate(value.getBirthDate())
-                        .playerType(value.getPlayerType())
                         .password(value.getPassword())
-                        .games(value.getGames())
                         .build();
 
                 userRepository.save(newUser);

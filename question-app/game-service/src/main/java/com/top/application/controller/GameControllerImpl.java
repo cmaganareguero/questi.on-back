@@ -3,6 +3,7 @@ package com.top.application.controller;
 import com.top.application.dto.*;
 import com.top.application.mapper.GameMapper;
 import com.top.application.model.Game;
+import com.top.application.model.Question;
 import com.top.infraestructure.service.GameService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,6 +123,23 @@ public class GameControllerImpl implements GameController {
             log.error("Error en getMonthlySuccessFailure: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @GetMapping("/getFailedQuestions")
+    public List<Question> getFailedQuestions(
+            @RequestParam String userId,
+            @RequestParam String category
+    ) {
+        return gameService.getFailedQuestions(userId, category);
+    }
+
+    // Obtener preguntas jugadas en esa categoría por otros usuarios y no jugadas por el usuario actual
+    @GetMapping("/getOtherUsersQuestions")
+    public List<Question> getOtherUsersQuestions(
+            @RequestParam String userId,
+            @RequestParam String category
+    ) {
+        return gameService.getOtherUsersQuestions(userId, category);
     }
 }
 

@@ -333,6 +333,44 @@ public class GameService {
         return result;
     }
 
+    public List<Question> getFailedQuestions(String userId, String category) {
+        List<Game> games = gameRepository.findGamesByIdUserAndCategory(userId, category);
+        List<Question> failedQuestions = new ArrayList<>();
+        for (Game game : games) {
+            for (Question q : game.getQuestions()) {
+                if (q.getCorrectAnswerIndex() != q.getSelectedAnswerIndex()) {
+                    failedQuestions.add(q);
+                }
+            }
+        }
+        return failedQuestions;
+    }
+
+    // Devuelve preguntas jugadas por otros usuarios y no jugadas por el usuario actual en esa categoría
+    public List<Question> getOtherUsersQuestions(String userId, String category) {
+        // Lógica: preguntas de la categoría que otros usuarios han jugado y el actual NO
+        List<Game> games = gameRepository.findGamesByCategory(category);
+        Set<String> userQuestions = new HashSet<>();
+        // Obtén IDs de preguntas ya jugadas por el usuario actual
+        List<Game> userGames = gameRepository.findGamesByIdUserAndCategory(userId, category);
+        for (Game g : userGames) {
+            for (Question q : g.getQuestions()) {
+                userQuestions.add(q.getId()); // asumiendo que Question tiene un id único
+            }
+        }
+        // Filtra preguntas de otros usuarios que el usuario actual no ha jugado
+        List<Question> otherUsersQuestions = new ArrayList<>();
+        for (Game game : games) {
+            if (!game.getIdUser().equals(userId)) {
+                for (Question q : game.getQuestions()) {
+                    if (!userQuestions.contains(q.getId())) {
+                        otherUsersQuestions.add(q);
+                    }
+                }
+            }
+        }
+        return otherUsersQuestions;
+    }
 
 }
 

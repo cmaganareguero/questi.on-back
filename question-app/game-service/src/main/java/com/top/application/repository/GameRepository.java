@@ -9,16 +9,14 @@ import java.util.List;
 public interface GameRepository extends MongoRepository<Game, String> {
 
     Game findFirstByIdUserOrderByDateDesc(String idUser);
-
     List<Game> findByIdUserAndDateGreaterThanEqual(String idUser, LocalDateTime date);
-
     List<Game> findGamesByIdUser(String idUser);
-
+    List<Game> findGamesByIdUserAndCategory(String idUser, String category);
+    List<Game> findGamesByCategory(String category);
     Game findFirstByIdUserAndCategoryAndGameState(
             String idUser,
             String category,
             String gameState
     );
-
     List<Game> findLastFiveGamesByCategoryOrderByDateDesc(String category);
 }

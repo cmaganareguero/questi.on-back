@@ -37,11 +37,12 @@ public class QuestionListener {
             String userId = key.getId();
 
             List<Game.Question> questions = apiService.generateQuestionsWithEmbeddings(
+                    key.getId(),
                     value.getCategory(),
                     value.getDifficulty(),
                     value.getNumQuestions(),
                     value.getAnswerType(),
-                    500
+                    1536
             );
 
             sendResponseToKafka(key, value, questions);
@@ -61,11 +62,11 @@ public class QuestionListener {
         responseKey.setIdUser(key.getId());
 
         GenerateQuestionResponseValue responseValue = new GenerateQuestionResponseValue();
+
         responseValue.setNumQuestions(value.getNumQuestions());
         responseValue.setDifficulty(value.getDifficulty());
         responseValue.setCategory(value.getCategory());
         responseValue.setAnswerType(value.getAnswerType());
-
         responseValue.setQuestions(mapToAvroQuestions(questions));
 
         kafkaTemplateResponse.send(API_RESPONSE_TOPIC, responseKey, responseValue);

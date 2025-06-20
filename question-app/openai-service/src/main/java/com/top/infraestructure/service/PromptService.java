@@ -15,7 +15,7 @@ public class PromptService {
         if ("CUATRO_RESPUESTAS".equals(answerType)) {
             String[] templates = new String[] {
                     "/* RUN: %s */ Genera exactamente %d preguntas de opción múltiple sobre \"%s\" "
-                            + "(dificultad \"%s\"). Devuélvelas ÚNICAMENTE como un array JSON puro, "
+                            + "de (dificultad \"%s\"). Devuélvelas ÚNICAMENTE como un array JSON puro, "
                             + "sin ningún texto antes ni después, con este formato:\n"
                             + "[\n"
                             + "  {\"pregunta\": \"\", \"opciones\": [\"\",\"\",\"\",\"\"], \"indice_correcto\": 0},\n"

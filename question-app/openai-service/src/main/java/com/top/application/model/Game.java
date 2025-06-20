@@ -1,6 +1,7 @@
 package com.top.application.model;
 
 import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,19 +29,14 @@ public class Game {
     @Getter
     @Setter
     @Builder
+    @Data
     public static class Question {
+        private String id;
         private String question;
         private List<String> answers;
         private int correctAnswerIndex;
+        private Integer selectedAnswerIndex;
         private List<Float> embedding;
-
-        public Question(String question, List<String> answers, int correctAnswerIndex, List<Float> embedding) {
-            //this.id = id;
-            this.question = question;
-            this.answers = answers;
-            this.correctAnswerIndex = correctAnswerIndex;
-            this.embedding = embedding;
-        }
 
         @Override
         public String toString() {

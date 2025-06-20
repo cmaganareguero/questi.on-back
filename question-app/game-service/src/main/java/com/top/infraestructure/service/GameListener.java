@@ -70,7 +70,7 @@ public class GameListener {
     private List<Question> createQuestions(List<com.top.avro.Question> avroQuestions) {
         List<Question> questions = new ArrayList<>();
         for (com.top.avro.Question avroQuestion : avroQuestions) {
-            Question question = new Question(avroQuestion.getQuestion(), avroQuestion.getAnswers(),avroQuestion.getCorrectAnswerIndex(), avroQuestion.getEmbedding());
+            Question question = new Question(UUID.randomUUID().toString(), avroQuestion.getQuestion(), avroQuestion.getAnswers(),avroQuestion.getCorrectAnswerIndex(), avroQuestion.getEmbedding(), null);
             questions.add(question);
         }
         return questions;
