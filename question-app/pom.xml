@@ -25,6 +25,7 @@
 		<module>game-service</module>
 		<module>openai-service</module>
 		<module>authorization-service</module>
+		<module>api-gateway</module>
     </modules>
 
 	<dependencies>

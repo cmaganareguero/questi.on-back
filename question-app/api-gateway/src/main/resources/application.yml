@@ -1,32 +1,74 @@
-spring:
-    application:
-        name: api-gateway
+server:
+  port: 8000
 
-    cloud:
-        gateway:
-            routes:
-                - id: auth_service_route
-                  uri: http://localhost:7786
-                  predicates:
-                      - Path=/auth/**
-                - id: user_service_route
-                  uri: lb://USER-SERVICE
-                  predicates:
-                      - Path=/users/**
-    security:
-        oauth2:
-            resourceserver:
-                jwt:
-                    jwk-set-uri: http://localhost:8080/.well-known/jwks.json
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        # Authorization service
+        - id: auth_service_route
+          uri: http://localhost:7786
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - RewritePath=/api/auth/(?<segment>.*), /$\{segment}
+
+        # User producer service
+        - id: user_producer_route
+          uri: http://localhost:7780
+          predicates:
+            - Path=/api/user-producer/**
+          filters:
+            - RewritePath=/api/user-producer/(?<segment>.*), /$\{segment}
+
+        # Userscript producer service
+        - id: userscript_producer_route
+          uri: http://localhost:7781
+          predicates:
+            - Path=/api/userscript/**
+          filters:
+            - RewritePath=/api/userscript/(?<segment>.*), /$\{segment}
+
+        # User consumer service
+        - id: user_consumer_route
+          uri: http://localhost:7789
+          predicates:
+            - Path=/api/user-consumer/**
+          filters:
+            - RewritePath=/api/user-consumer/(?<segment>.*), /$\{segment}
+
+        # OpenAI service
+        - id: openai_service_route
+          uri: http://localhost:7783
+          predicates:
+            - Path=/api/openai/**
+          filters:
+            - RewritePath=/api/openai/(?<segment>.*), /$\{segment}
+
+        # Game service
+        - id: game_service_route
+          uri: http://localhost:7785
+          predicates:
+            - Path=/api/games/**
+          filters:
+            - RewritePath=/api/games/(?<segment>.*), /$\{segment}
+
+      # Configuraciones globales
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
 
 logging:
-    level:
-        ROOT: INFO
-        com.top: DEBUG
-        io.confluent.kafka: ERROR
-        org.apache.kafka: ERROR
-
-eureka:
-    client:
-        service-url:
-            defaultZone: http://localhost:8761/eureka/
+  level:
+    ROOT: INFO
+    com.top: DEBUG
+    io.confluent.kafka: ERROR
+    org.apache.kafka: ERROR
+    org.springframework.cloud.gateway: INFO  # Cambiado a INFO para menos logs en operación normal
