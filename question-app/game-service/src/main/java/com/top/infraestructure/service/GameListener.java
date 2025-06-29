@@ -34,7 +34,7 @@ public class GameListener {
     GameRepository gameRepository;
 
     @KafkaListener(topics = "api-response", groupId = "api-game-response")
-    public void consumeFromTopicUser(ConsumerRecord<GenerateQuestionResponseKey, GenerateQuestionResponseValue> record) {
+    public void consumeFromTopicApiResponse(ConsumerRecord<GenerateQuestionResponseKey, GenerateQuestionResponseValue> record) {
         try {
             GenerateQuestionResponseKey key = record.key();
             GenerateQuestionResponseValue value = record.value();

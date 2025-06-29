@@ -21,7 +21,7 @@ public class RequestAPIControllerImpl implements RequestAPIController {
     @Override
     @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseEntity<Integer> sendRequestToAPI(@RequestBody RequestAPIDto requestAPIDto) {
+    public ResponseEntity<Integer> generateNewGameRequest(@RequestBody RequestAPIDto requestAPIDto) {
         try {
             requestAPIService.sendRequestToAPI(requestAPIDto);
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(202);

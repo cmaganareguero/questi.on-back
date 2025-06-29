@@ -55,16 +55,6 @@ spring:
           filters:
             - RewritePath=/api/games/(?<segment>.*), /$\{segment}
 
-      # Configuraciones globales
-      default-filters:
-        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOrigins: "*"
-            allowedMethods: "*"
-            allowedHeaders: "*"
-
 logging:
   level:
     ROOT: INFO

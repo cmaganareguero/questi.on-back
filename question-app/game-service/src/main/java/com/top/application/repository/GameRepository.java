@@ -13,6 +13,7 @@ public interface GameRepository extends MongoRepository<Game, String> {
     List<Game> findGamesByIdUser(String idUser);
     List<Game> findGamesByIdUserAndCategory(String idUser, String category);
     List<Game> findGamesByCategory(String category);
+    List<Game> findGamesByCategoryAndAnswerType(String category, String answerType);
     Game findFirstByIdUserAndCategoryAndGameState(
             String idUser,
             String category,

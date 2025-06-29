@@ -91,7 +91,7 @@ public class OpenAIClient {
 
     private APIRequest buildModelGpt4o(String content, double temperature, double topP) {
         return APIRequest.builder()
-                .model("gpt-3.5-turbo")
+                .model("gpt-4o")
                 .messages(Arrays.asList(
                         new APIRequest.Message("system", content),
                         new APIRequest.Message("user", "Juego de preguntas")

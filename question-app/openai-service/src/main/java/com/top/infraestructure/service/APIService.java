@@ -80,7 +80,7 @@ public class APIService {
         // 2. Preguntas de otros usuarios, diferentes a las ya respondidas (comparando embedding)
         try {
             if (resultado.size() < numberOfQuestions) {
-                List<Game.Question> others = gameServiceFeignClient.getOtherUsersQuestions(userId, category);
+                List<Game.Question> others = gameServiceFeignClient.getOtherUsersQuestions(userId, category, answerType);
                 if (others != null) {
                     for (Game.Question q : others) {
                         float[] embArr = toFloatArray(q.getEmbedding(), embeddingSize);

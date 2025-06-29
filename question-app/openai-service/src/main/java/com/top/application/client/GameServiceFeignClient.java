@@ -12,8 +12,8 @@ public interface GameServiceFeignClient {
 
     @GetMapping("/game/getEmbeddingsFromRecentGames")
     List<List<Float>> getEmbeddingsFromRecentGames(@RequestParam("category") String category);
-    @GetMapping("/game/getEmbeddingsFromRecentGames")
+    @GetMapping("/game/getFailedQuestions")
     List<Game.Question> getFailedQuestions(@RequestParam("userId") String idUser, @RequestParam("category") String category);
     @GetMapping("/game/getOtherUsersQuestions")
-    List<Game.Question> getOtherUsersQuestions(@RequestParam("userId") String idUser, @RequestParam("category") String category);
+    List<Game.Question> getOtherUsersQuestions(@RequestParam("userId") String idUser, @RequestParam("category") String category, @RequestParam("answerType") String answerType);
 }

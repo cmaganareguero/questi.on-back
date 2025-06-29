@@ -137,9 +137,10 @@ public class GameControllerImpl implements GameController {
     @GetMapping("/getOtherUsersQuestions")
     public List<Question> getOtherUsersQuestions(
             @RequestParam String userId,
-            @RequestParam String category
+            @RequestParam String category,
+            @RequestParam String answerType
     ) {
-        return gameService.getOtherUsersQuestions(userId, category);
+        return gameService.getOtherUsersQuestions(userId, category, answerType);
     }
 }
 

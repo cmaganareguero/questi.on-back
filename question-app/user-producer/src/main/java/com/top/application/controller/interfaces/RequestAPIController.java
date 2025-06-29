@@ -14,6 +14,6 @@ public interface RequestAPIController {
             @ApiResponse(responseCode = "200", description = "User sent"),
             @ApiResponse(responseCode = "400", description = "Bad request")
     })
-    ResponseEntity<Integer> sendRequestToAPI(RequestAPIDto requestAPIDto);
+    ResponseEntity<Integer> generateNewGameRequest(RequestAPIDto requestAPIDto);
 
 }
